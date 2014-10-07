@@ -11,7 +11,6 @@
 #import <ncurses.h>
 #import <stdlib.h>
 #include <time.h>
-#import <string.h>
 
 int grid[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 int debug = false;
@@ -27,10 +26,9 @@ int main(int argc, const char * argv[]) {
 
   initializeBoard();
   setup();
+  printBoard();
 
   int flag = 1;
-
-  printBoard();
 
   while( flag ) {
     int uInput = getch();
@@ -71,9 +69,8 @@ void setup() {
 }
 
 void initializeBoard() {
-  //Pick two unique random numbers between 0-15 and set them to 2.
+  //Pick two squares and set them to 2.
 
-  /* Pick an int from 0 - 15 */
   int squareOne = rand() % 16;
   int squareTwo;
 
@@ -81,8 +78,7 @@ void initializeBoard() {
     squareTwo = rand() % 16;
   } while ( squareTwo == squareOne );
 
-  grid[squareOne] = 2;
-  grid[squareTwo] = 2;
+  grid[squareOne] = grid[squareTwo] = 2;
 }
 
 void printBoard() {
@@ -129,6 +125,8 @@ void shift( int direction ) {
 }
 
 char * intToDisplay(int inputNumber) {
+  //TODO: Refactor this messy code.
+
   char * returnString = malloc(4*sizeof(char*));
 
   if (inputNumber != 0) {
@@ -147,26 +145,33 @@ char * intToDisplay(int inputNumber) {
       length++;
     }
 
-    if (length == 1) {
-      returnString[0] = ' ';
-      returnString[1] = str[0];
-      returnString[2] = ' ';
-      returnString[3] = ' ';
-    } else if (length == 2) {
-      returnString[0] = ' ';
-      returnString[1] = str[0];
-      returnString[2] = str[1];
-      returnString[3] = ' ';
-    } else if (length == 3) {
-      returnString[0] = ' ';
-      returnString[1] = str[0];
-      returnString[2] = str[1];
-      returnString[3] = str[2];
-    } else if (length == 4) {
-      returnString[0] = str[0];
-      returnString[1] = str[1];
-      returnString[2] = str[2];
-      returnString[3] = str[3];
+    switch (length) {
+      case 1:
+        returnString[0] = ' ';
+        returnString[1] = str[0];
+        returnString[2] = ' ';
+        returnString[3] = ' ';
+        break;
+      case 2:
+        returnString[0] = ' ';
+        returnString[1] = str[0];
+        returnString[2] = str[1];
+        returnString[3] = ' ';
+        break;
+      case 3:
+        returnString[0] = ' ';
+        returnString[1] = str[0];
+        returnString[2] = str[1];
+        returnString[3] = str[2];
+        break;
+      case 4:
+        returnString[0] = str[0];
+        returnString[1] = str[1];
+        returnString[2] = str[2];
+        returnString[3] = str[3];
+        break;
+      default:
+        break;
     }
   } else {
     returnString[0] = ' ';
