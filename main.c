@@ -39,6 +39,7 @@ int main(int argc, const char * argv[]) {
         break;
       case 'd':
         debug = !debug;
+		mvprintw(0,25, "Direction = ");
         break;
       case KEY_RIGHT:
         shift(0);
