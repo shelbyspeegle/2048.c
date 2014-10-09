@@ -3,7 +3,7 @@
  *  C-2048
  *
  *  Created on: October 5, 2014
- *     Author: shelbyspeegle
+ *     Author: shelbyspeegle & jesselink333
  */
 
 
@@ -20,6 +20,7 @@ void initializeBoard();
 char * intToDisplay( int input );
 void printBoard();
 void shift( int direction );
+void showDebugInfo( int debug );
 
 int main(int argc, const char * argv[]) {
   srand( (unsigned) time(0) ); // Seed rand with this so it is more random
@@ -39,7 +40,7 @@ int main(int argc, const char * argv[]) {
         break;
       case 'd':
         debug = !debug;
-		mvprintw(0,25, "Direction = ");
+        showDebugInfo(debug);
         break;
       case KEY_RIGHT:
         shift(0);
@@ -182,4 +183,12 @@ char * intToDisplay(int inputNumber) {
   }
 
   return returnString;
+}
+
+void showDebugInfo( int debug ) {
+  if (debug) {
+    mvprintw(0,25, "Direction = ");
+  } else {
+    mvprintw(0,25, "             ");
+  }
 }
