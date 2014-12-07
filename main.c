@@ -20,7 +20,11 @@ void initializeBoard();
 char * intToDisplay( int input );
 void printBoard();
 void shift( int direction );
-void showDebugInfo( int debug );
+void shiftRight();
+void shiftUp();
+void shiftLeft();
+void shiftDown();
+void showDebugInfo();
 
 int main(int argc, const char * argv[]) {
   srand( (unsigned) time(0) ); // Seed rand with this so it is more random
@@ -40,7 +44,7 @@ int main(int argc, const char * argv[]) {
         break;
       case 'd':
         debug = !debug;
-        showDebugInfo(debug);
+        showDebugInfo();
         break;
       case KEY_RIGHT:
         shift(0);
@@ -57,6 +61,8 @@ int main(int argc, const char * argv[]) {
       default:
         break;
     }
+
+    printBoard();
   }
 
   endwin(); // End ncurses mode
@@ -117,14 +123,186 @@ void printBoard() {
     addch(ACS_HLINE);
     addch(ACS_LRCORNER);
   }
+
+  showDebugInfo();
   refresh();
 }
 
 void shift( int direction ) {
-  //TODO: implement
+  switch ( direction ) {
+    case 0:
+      shiftRight();
+      break;
+    case 1:
+      shiftUp();
+      break;
+    case 2:
+      shiftLeft();
+      break;
+    case 3:
+      shiftDown();
+      break;
+    default:
+      break;
+  }
+
+  //TODO: add a random tile.
 
   if (debug) mvprintw(0,25, "Direction = %i", direction);
 }
+
+void shiftRight() {
+  int row;
+  for ( row = 0; row < 4; row++ ) {
+    int i = ((row + 1) * 4) - 1; // 3, 7, 11, 15
+    int j = i - 1;
+    int rowLimit = (row * 4); // 0, 4, 8, 12
+    while (i >= rowLimit && j >= rowLimit) { // 4, 8, 12, 16
+      if (grid[i] == 0) {
+        i--;
+        j--;
+      } else if (grid[j] == 0) {
+        j--;
+      } else if (grid[i] == grid[j]) {
+        grid[i] *= 2;
+        grid[j] = 0;
+        i -= 2;
+        j = i - 1;
+      } else {
+        i--;
+        j = i - 1;
+      }
+    }
+
+    j = ((row+1)* 4) - 1; // 3, 7, 11, 15
+
+    for (i = j; i >= rowLimit; i--) { // 0, 4, 8, 12
+      if (grid[i] != 0) {
+        grid[j] = grid[i];
+        j--;
+      }
+    }
+
+    for (; j >= rowLimit; j--) {
+      grid[j] = 0;
+    }
+  }
+}
+
+void shiftUp() {
+  int col;
+  for ( col = 0; col < 4; col++ ) {
+    int i = col; // 0, 1, 2, 3
+    int j = i + 4;
+    int rowLimit = 12 + col;
+    while (i <= rowLimit && j <= rowLimit) { // 12, 13, 14, 15
+      if (grid[i] == 0) {
+        i += 4;
+        j += 4;
+      } else if (grid[j] == 0) {
+        j += 4;
+      } else if (grid[i] == grid[j]) {
+        grid[i] *= 2;
+        grid[j] = 0;
+        i += 8;
+        j = i + 4;
+      } else {
+        i += 4;
+        j = i + 4;
+      }
+    }
+
+    j = col; // 0, 1, 2, 3
+
+    for (i = j; i <= rowLimit; i += 4) { // 12, 13, 14, 15
+      if (grid[i] != 0) {
+        grid[j] = grid[i];
+        j += 4;
+      }
+    }
+
+    for (; j <= rowLimit; j += 4) {
+      grid[j] = 0;
+    }
+  }
+}
+
+void shiftLeft() {
+  int row;
+  for ( row = 0; row < 4; row++ ) {
+    int i = row * 4; // 0, 4, 8, 12
+    int j = i + 1;
+    int rowLimit = (row + 1) * 4;
+    while (i < rowLimit && j < rowLimit) { // 4, 8, 12, 16
+      if (grid[i] == 0) {
+        i++;
+        j++;
+      } else if (grid[j] == 0) {
+        j++;
+      } else if (grid[i] == grid[j]) {
+        grid[i] *= 2;
+        grid[j] = 0;
+        i += 2;
+        j = i + 1;
+      } else {
+        i++;
+        j = i + 1;
+      }
+    }
+
+    j = row * 4; // 0, 4, 8, 12
+
+    for (i = j; i < rowLimit; i++) { // 4, 8, 12, 16
+      if (grid[i] != 0) {
+        grid[j] = grid[i];
+        j++;
+      }
+    }
+
+    for (; j < rowLimit; j++) {
+      grid[j] = 0;
+    }
+  }
+}
+
+void shiftDown() {
+  int col;
+  for ( col = 0; col < 4; col++ ) {
+    int i = 12 + col; // 12, 13, 14, 15
+    int j = i - 4;
+    int rowLimit = col;
+    while (i >= rowLimit && j >= rowLimit) { // 12, 13, 14, 15
+      if (grid[i] == 0) {
+        i -= 4;
+        j -= 4;
+      } else if (grid[j] == 0) {
+        j -= 4;
+      } else if (grid[i] == grid[j]) {
+        grid[i] *= 2;
+        grid[j] = 0;
+        i -= 8;
+        j = i - 4;
+      } else {
+        i -= 4;
+        j = i - 4;
+      }
+    }
+
+    j = 12 + col; // 12, 13, 14, 15
+
+    for (i = j; i >= rowLimit; i -= 4) { // 0, 1, 2, 3
+      if (grid[i] != 0) {
+        grid[j] = grid[i];
+        j -= 4;
+      }
+    }
+
+    for (; j >= rowLimit; j -= 4) {
+      grid[j] = 0;
+    }
+  }
+}
+
 
 char * intToDisplay(int inputNumber) {
   //TODO: Refactor this messy code.
@@ -185,7 +363,7 @@ char * intToDisplay(int inputNumber) {
   return returnString;
 }
 
-void showDebugInfo( int debug ) {
+void showDebugInfo() {
   if (debug) {
     mvprintw(0,25, "Direction = ");
   } else {
