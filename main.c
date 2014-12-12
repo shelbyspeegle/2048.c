@@ -8,8 +8,8 @@
 
 
 #include <stdio.h>
-#import <ncurses.h>
-#import <stdlib.h>
+#include <ncurses.h>
+#include <stdlib.h>
 #include <time.h>
 
 // TODO: Write highScore to disk.
@@ -22,6 +22,7 @@ int grid[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 int debug = false;
 int score = 0;
 int highScore = 0;
+
 
 char * intToDisplay( int input );
 void newGame();
@@ -38,10 +39,20 @@ void showDebugInfo( int direction );
 int main(int argc, const char * argv[]) {
   srand( (unsigned) time(0) ); // Seed rand with this so it is more random
 
+  FILE *f = fopen(".scores", "r+");
+  
+  char line[256];
+
+  if ( fgets(line, sizeof(line), f) ) {
+    highScore = atoi(line);
+    fclose(f);
+    f = fopen(".scores", "wb");
+  }
+
   setup();
   newGame();
   printBoard();
-
+  
   int flag = true;
 
   while( flag ) {
@@ -72,6 +83,13 @@ int main(int argc, const char * argv[]) {
     }
   }
 
+  if ( score > highScore ) {
+    fprintf(f, "%i", score);
+  } else {
+    fprintf(f, "%i", highScore);
+  }
+
+  fclose(f);
   endwin(); // End ncurses mode
   exit( EXIT_SUCCESS );
 }
