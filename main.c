@@ -40,15 +40,16 @@ int main(int argc, const char * argv[]) {
   srand( (unsigned) time(0) ); // Seed rand with this so it is more random
 
   FILE *f = fopen(".scores", "r+");
-  
-  char line[256];
-
-  if ( fgets(line, sizeof(line), f) ) {
-    highScore = atoi(line);
-    fclose(f);
-    f = fopen(".scores", "wb");
+ 
+  if (f) {
+    char line[256];
+    if ( fgets(line, sizeof(line), f) ) {
+      highScore = atoi(line);
+      fclose(f);
+    }
   }
 
+  f = fopen(".scores", "wb");
   setup();
   newGame();
   printBoard();
