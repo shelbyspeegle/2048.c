@@ -12,10 +12,12 @@
 #include <stdlib.h>
 #include <time.h>
 
-// TODO: Write highScore to disk.
-// TODO: Read in highScore from disk.
 // TODO: Handle "end game" cases.
 // TODO: Use the r key to restart the game.
+// TODO: User cannot spawn a new tile when shifting in a direction where movement isn't possible.
+// TODO: See if terminal can handle colors.
+// TODO: See if terminal can handle CHANGING colors.
+// TODO: Change colors to match web version.
 
 const int START_LINE = 3;
 int grid[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -23,18 +25,15 @@ int debug = false;
 int score = 0;
 int highScore = 0;
 
-
 char * intToDisplay( int input );
 void newGame();
 void printBoard();
 int randomFreeSpace();
 void setup();
 void shift( int direction );
-void shiftDown();
-void shiftLeft();
 void shiftRight();
-void shiftUp();
 void showDebugInfo( int direction );
+void rotateccw();
 
 int main(int argc, const char * argv[]) {
   srand( (unsigned) time(0) ); // Seed rand with this so it is more random
@@ -229,21 +228,24 @@ void setup() {
 }
 
 void shift( int direction ) {
-  switch ( direction ) {
-    case 0:
-      shiftRight();
-      break;
-    case 1:
-      shiftUp();
-      break;
-    case 2:
-      shiftLeft();
-      break;
-    case 3:
-      shiftDown();
-      break;
-    default:
-      break;
+  int numberOfRotationsBefore = 0;
+  int numberOfRotationsAfter = direction;
+
+  // Rotations before
+  if (direction != 0) {
+    numberOfRotationsBefore = 4-direction;
+  }
+
+  int i;
+  for (i = 0; i < numberOfRotationsBefore; i++) {
+    rotateccw();
+  }
+
+  shiftRight();
+
+  // Rotations after
+  for (i = 0; i < numberOfRotationsAfter; i++) {
+    rotateccw();
   }
 
   // Set a random free square on the board to a 2 or 4.
@@ -254,81 +256,25 @@ void shift( int direction ) {
   printBoard();
 }
 
-void shiftDown() {
-  int col;
-  for ( col = 0; col < 4; col++ ) {
-    int i = 12 + col; // 12, 13, 14, 15
-    int j = i - 4;
-    int rowLimit = col;
-    while (i >= rowLimit && j >= rowLimit) { // 12, 13, 14, 15
-      if (grid[i] == 0) {
-        i -= 4;
-        j -= 4;
-      } else if (grid[j] == 0) {
-        j -= 4;
-      } else if (grid[i] == grid[j]) {
-        score += grid[i] *= 2;
-        grid[j] = 0;
-        i -= 8;
-        j = i - 4;
-      } else {
-        i -= 4;
-        j = i - 4;
-      }
-    }
+void rotateccw() {
+  int tempGrid[16];
 
-    j = 12 + col; // 12, 13, 14, 15
+  int i;
+  for (i = 0; i < 16; i++) {
+    tempGrid[i] = grid[i];
+  }
 
-    for (i = j; i >= rowLimit; i -= 4) { // 0, 1, 2, 3
-      if (grid[i] != 0) {
-        grid[j] = grid[i];
-        j -= 4;
-      }
-    }
-
-    for (; j >= rowLimit; j -= 4) {
-      grid[j] = 0;
+  i = 0;
+  int j;
+  int countModifier;
+  for ( countModifier = 0; countModifier < 4; countModifier++ ) {
+    for ( j = 12+countModifier; j >= 0; j -= 4 ) {
+      grid[j] = tempGrid[i++];
     }
   }
 }
 
-void shiftLeft() {
-  int row;
-  for ( row = 0; row < 4; row++ ) {
-    int i = row * 4; // 0, 4, 8, 12
-    int j = i + 1;
-    int rowLimit = (row + 1) * 4;
-    while (i < rowLimit && j < rowLimit) { // 4, 8, 12, 16
-      if (grid[i] == 0) {
-        i++;
-        j++;
-      } else if (grid[j] == 0) {
-        j++;
-      } else if (grid[i] == grid[j]) {
-        score += grid[i] *= 2;
-        grid[j] = 0;
-        i += 2;
-        j = i + 1;
-      } else {
-        i++;
-        j = i + 1;
-      }
-    }
 
-    j = row * 4; // 0, 4, 8, 12
-
-    for (i = j; i < rowLimit; i++) { // 4, 8, 12, 16
-      if (grid[i] != 0) {
-        grid[j] = grid[i];
-        j++;
-      }
-    }
-
-    for (; j < rowLimit; j++) {
-      grid[j] = 0;
-    }
-  }
-}
 
 void shiftRight() {
   int row;
@@ -368,50 +314,10 @@ void shiftRight() {
   }
 }
 
-void shiftUp() {
-  int col;
-  for ( col = 0; col < 4; col++ ) {
-    int i = col; // 0, 1, 2, 3
-    int j = i + 4;
-    int rowLimit = 12 + col;
-    while (i <= rowLimit && j <= rowLimit) { // 12, 13, 14, 15
-      if (grid[i] == 0) {
-        i += 4;
-        j += 4;
-      } else if (grid[j] == 0) {
-        j += 4;
-      } else if (grid[i] == grid[j]) {
-        score += grid[i] *= 2;
-        grid[j] = 0;
-        i += 8;
-        j = i + 4;
-      } else {
-        i += 4;
-        j = i + 4;
-      }
-    }
-
-    j = col; // 0, 1, 2, 3
-
-    for (i = j; i <= rowLimit; i += 4) { // 12, 13, 14, 15
-      if (grid[i] != 0) {
-        grid[j] = grid[i];
-        j += 4;
-      }
-    }
-
-    for (; j <= rowLimit; j += 4) {
-      grid[j] = 0;
-    }
-  }
-}
-
 void showDebugInfo( int direction ) {
   if ( debug ) {
       mvprintw(0,25, "Direction = %i", direction);
   } else {
     mvprintw(0,25, "             ");
   }
-
-//  refresh();
 }
