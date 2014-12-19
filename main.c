@@ -13,16 +13,17 @@
 #include <time.h>
 
 // TODO: Handle "end game" cases.
-// TODO: Use the r key to restart the game.
 // TODO: User cannot spawn a new tile when shifting in a direction where movement isn't possible.
 // TODO: See if terminal can handle colors.
 // TODO: See if terminal can handle CHANGING colors.
 // TODO: Change colors to match web version.
+// TODO: Center game in terminal
+// TODO: Remove ncurses dependency.
 
 const int START_LINE = 3;
-int grid[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+int grid[16];
 int debug = false;
-int score = 0;
+int score;
 int highScore = 0;
 
 char * intToDisplay( int input );
@@ -51,7 +52,6 @@ int main(int argc, const char * argv[]) {
   f = fopen(".scores", "wb");
   setup();
   newGame();
-  printBoard();
   
   int flag = true;
 
@@ -61,6 +61,9 @@ int main(int argc, const char * argv[]) {
     switch (uInput) {
       case 'q':
         flag = false;
+        break;
+      case 'r':
+        newGame();
         break;
       case 'd':
         debug = !debug;
@@ -154,8 +157,16 @@ char * intToDisplay(int inputNumber) {
 }
 
 void newGame() {
+  score = 0;
+
+  for (int i = 0; i < 16; i++) {
+    grid[i] = 0;
+  }
+
   grid[randomFreeSpace()] = 2;
   grid[randomFreeSpace()] = 2;
+
+  printBoard();
 }
 
 void printBoard() {
