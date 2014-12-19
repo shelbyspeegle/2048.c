@@ -17,15 +17,18 @@
 // TODO: See if terminal can handle colors.
 // TODO: See if terminal can handle CHANGING colors.
 // TODO: Change colors to match web version.
-// TODO: Center game in terminal
+// TODO: Center game in terminal.
 // TODO: Remove ncurses dependency.
+// TODO: Check for memory leaks.
 
 const int START_LINE = 3;
 int grid[16];
 int debug = false;
 int score;
 int highScore = 0;
+FILE *f;
 
+void loadScoreData();
 char * intToDisplay( int input );
 void newGame();
 void printBoard();
@@ -35,32 +38,22 @@ void shift( int direction );
 void shiftRight();
 void showDebugInfo( int direction );
 void rotateccw();
+void finish();
 
 int main(int argc, const char * argv[]) {
   srand( (unsigned) time(0) ); // Seed rand with this so it is more random
 
-  FILE *f = fopen(".scores", "r+");
- 
-  if (f) {
-    char line[256];
-    if ( fgets(line, sizeof(line), f) ) {
-      highScore = atoi(line);
-      fclose(f);
-    }
-  }
-
-  f = fopen(".scores", "wb");
   setup();
   newGame();
   
-  int flag = true;
+  int playing = true;
 
-  while( flag ) {
+  while( playing ) {
     int uInput = getch();
 
     switch (uInput) {
       case 'q':
-        flag = false;
+        playing = false;
         break;
       case 'r':
         newGame();
@@ -86,21 +79,32 @@ int main(int argc, const char * argv[]) {
     }
   }
 
-  if ( score > highScore ) {
-    fprintf(f, "%i", score);
-  } else {
-    fprintf(f, "%i", highScore);
-  }
+  finish();
 
-  fclose(f);
-  endwin(); // End ncurses mode
   exit( EXIT_SUCCESS );
 }
 
-char * intToDisplay(int inputNumber) {
-  //TODO: Refactor this messy code.
+void loadScoreData() {
+  f = fopen(".scores", "r+");
 
+  if (f) {
+    char line[256];
+    if ( fgets(line, sizeof(line), f) ) {
+      highScore = atoi(line);
+      fclose(f);
+    }
+  }
+
+  f = fopen(".scores", "wb");
+}
+
+char * intToDisplay(int inputNumber) {
   char * returnString = malloc(4*sizeof(char*));
+
+  returnString[0] = ' ';
+  returnString[1] = ' ';
+  returnString[2] = ' ';
+  returnString[3] = ' ';
 
   if (inputNumber != 0) {
     char str[4];
@@ -119,38 +123,22 @@ char * intToDisplay(int inputNumber) {
     }
 
     switch (length) {
-      case 1:
-        returnString[0] = ' ';
-        returnString[1] = str[0];
-        returnString[2] = ' ';
-        returnString[3] = ' ';
-        break;
-      case 2:
-        returnString[0] = ' ';
-        returnString[1] = str[0];
-        returnString[2] = str[1];
-        returnString[3] = ' ';
-        break;
-      case 3:
-        returnString[0] = ' ';
-        returnString[1] = str[0];
-        returnString[2] = str[1];
-        returnString[3] = str[2];
-        break;
       case 4:
         returnString[0] = str[0];
         returnString[1] = str[1];
         returnString[2] = str[2];
         returnString[3] = str[3];
         break;
+      case 3:
+        returnString[3] = str[2];
+      case 2:
+        returnString[2] = str[1];
+      case 1:
+        returnString[1] = str[0];
+        break;
       default:
         break;
     }
-  } else {
-    returnString[0] = ' ';
-    returnString[1] = ' ';
-    returnString[2] = ' ';
-    returnString[3] = ' ';
   }
 
   return returnString;
@@ -232,6 +220,7 @@ int randomFreeSpace() {
 }
 
 void setup() {
+  loadScoreData();
   initscr(); // Start ncurses mode
   noecho(); // Silence user input
   curs_set(0); // Hide the cursor
@@ -285,8 +274,6 @@ void rotateccw() {
   }
 }
 
-
-
 void shiftRight() {
   int row;
   for ( row = 0; row < 4; row++ ) {
@@ -331,4 +318,15 @@ void showDebugInfo( int direction ) {
   } else {
     mvprintw(0,25, "             ");
   }
+}
+
+void finish() {
+  if ( score > highScore ) {
+    fprintf(f, "%i", score);
+  } else {
+    fprintf(f, "%i", highScore);
+  }
+
+  fclose(f);
+  endwin(); // End ncurses mode
 }
