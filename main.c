@@ -147,7 +147,8 @@ char * intToDisplay(int inputNumber) {
 void newGame() {
   score = 0;
 
-  for (int i = 0; i < 16; i++) {
+  int i;
+  for (i = 0; i < 16; i++) {
     grid[i] = 0;
   }
 
