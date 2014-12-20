@@ -37,6 +37,12 @@ int shiftRight();
 void showDebugInfo( int direction );
 void rotateccw();
 void finish();
+int tilePairsExist();
+int checkNeighborsForMatch( int tileIndex );
+int tileEast( int tileIndex );
+int tileNorth( int tileIndex );
+int tileWest( int tileIndex );
+int tileSouth( int tileIndex );
 
 int main(int argc, const char * argv[]) {
   srand( (unsigned) time(0) ); // Seed rand with this so it is more random
@@ -74,6 +80,10 @@ int main(int argc, const char * argv[]) {
         break;
       default:
         break;
+    }
+
+    if (!tilePairsExist()) {
+      playing = false;
     }
   }
 
@@ -288,7 +298,7 @@ int shiftRight() {
   }
 
   for ( row = 0; row < 4; row++ ) {
-    int i = ((row + 1) * 4) - 1; // 3, 7, 11, 15
+    i = ((row + 1) * 4) - 1; // 3, 7, 11, 15
     int j = i - 1;
     int rowLimit = (row * 4); // 0, 4, 8, 12
     while (i >= rowLimit && j >= rowLimit) { // 4, 8, 12, 16
@@ -336,6 +346,79 @@ void showDebugInfo( int direction ) {
       mvprintw(0,25, "Direction = %i", direction);
   } else {
     mvprintw(0,25, "             ");
+  }
+}
+
+int tilePairsExist() {
+  int i;
+  for ( i = 0; i < 16; i++ ) {
+    if (checkNeighborsForMatch(i)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+int checkNeighborsForMatch(int tileIndex) {
+  if (tileEast(tileIndex) > 0) {
+    if ( grid[tileIndex] == grid[tileEast(tileIndex)]) {
+      return true;
+    }
+  }
+
+  if (tileNorth(tileIndex) > 0) {
+    if ( grid[tileIndex] == grid[tileNorth(tileIndex)]) {
+      return true;
+    }
+  }
+
+  if (tileWest(tileIndex) > 0) {
+    if ( grid[tileIndex] == grid[tileWest(tileIndex)]) {
+      return true;
+    }
+  }
+
+  if (tileSouth(tileIndex) > 0) {
+    if ( grid[tileIndex] == grid[tileSouth(tileIndex)]) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+int tileEast(int tileIndex){
+  int canCheckE = tileIndex != 3 && tileIndex != 7 && tileIndex != 11 && tileIndex != 15;
+
+  if ( canCheckE ) {
+    return tileIndex + 1;
+  } else {
+    return -1;
+  }
+}
+
+int tileNorth(int tileIndex){
+  int canCheckN = tileIndex > 3;
+  if ( canCheckN ) {
+    return tileIndex - 4;
+  } else {
+    return -1;
+  }
+}
+
+int tileWest(int tileIndex){
+  int canCheckW = tileIndex != 0 && tileIndex != 4 && tileIndex != 8 && tileIndex != 12;
+
+  return canCheckW ? tileIndex - 1 : -1;
+}
+
+int tileSouth(int tileIndex){
+  int canCheckS = tileIndex < 12;
+  if ( canCheckS ) {
+    return tileIndex + 4;
+  } else {
+    return -1;
   }
 }
 
