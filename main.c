@@ -13,13 +13,11 @@
 #include <time.h>
 
 // TODO: Handle "end game" cases.
-// TODO: User cannot spawn a new tile when shifting in a direction where movement isn't possible.
 // TODO: See if terminal can handle colors.
 // TODO: See if terminal can handle CHANGING colors.
 // TODO: Change colors to match web version.
 // TODO: Center game in terminal.
 // TODO: Remove ncurses dependency.
-// TODO: Check for memory leaks.
 
 const int START_LINE = 3;
 int grid[16];
@@ -35,7 +33,7 @@ void printBoard();
 int randomFreeSpace();
 void setup();
 void shift( int direction );
-void shiftRight();
+int shiftRight();
 void showDebugInfo( int direction );
 void rotateccw();
 void finish();
@@ -244,16 +242,17 @@ void shift( int direction ) {
     rotateccw();
   }
 
-  shiftRight();
+  int changeHappened = shiftRight();
 
   // Rotations after
   for (i = 0; i < numberOfRotationsAfter; i++) {
     rotateccw();
   }
-
-  // Set a random free square on the board to a 2 or 4.
-  int newSquareValue = 2 * ((rand() % 2 ) + 1);
-  grid[randomFreeSpace()] = newSquareValue;
+  if (changeHappened) {
+    // Set a random free square on the board to a 2 or 4.
+    int newSquareValue = 2 * ((rand() % 2 ) + 1);
+    grid[randomFreeSpace()] = newSquareValue;
+  }
 
   showDebugInfo( direction );
   printBoard();
@@ -277,8 +276,17 @@ void rotateccw() {
   }
 }
 
-void shiftRight() {
+int shiftRight() {
   int row;
+  int changeHappened = false;
+
+  int tempGrid[16];
+
+  int i;
+  for (i = 0; i < 16; i++) {
+    tempGrid[i] = grid[i];
+  }
+
   for ( row = 0; row < 4; row++ ) {
     int i = ((row + 1) * 4) - 1; // 3, 7, 11, 15
     int j = i - 1;
@@ -313,6 +321,14 @@ void shiftRight() {
       grid[j] = 0;
     }
   }
+
+  for (i = 0; i < 16; i++) {
+    if (tempGrid[i] != grid[i]) {
+      changeHappened = true;
+    }
+  }
+
+  return changeHappened;
 }
 
 void showDebugInfo( int direction ) {
