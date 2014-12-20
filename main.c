@@ -190,7 +190,9 @@ void printBoard() {
     addch(ACS_HLINE);
     addch(ACS_URCORNER);
     mvaddch(squareStartY +1, squareStartX, ACS_VLINE);
-    mvprintw(squareStartY +1, squareStartX +1, "%s", intToDisplay(squareValue));
+    char * gridLabel = intToDisplay(squareValue);
+    mvprintw(squareStartY +1, squareStartX +1, "%s", gridLabel);
+    free(gridLabel);
     mvaddch(squareStartY +1, squareStartX +5, ACS_VLINE);
     move(squareStartY +2, squareStartX);
     addch(ACS_LLCORNER);
