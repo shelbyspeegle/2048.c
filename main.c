@@ -93,17 +93,16 @@ int main(int argc, const char * argv[]) {
 }
 
 void loadScoreData() {
-  f = fopen(".scores", "r+");
+  f = fopen(".scores", "r");
 
   if (f) {
     char line[256];
     if ( fgets(line, sizeof(line), f) ) {
       highScore = atoi(line);
       fclose(f);
+      f = NULL;
     }
   }
-
-  f = fopen(".scores", "wb");
 }
 
 char * intToDisplay(int inputNumber) {
@@ -423,12 +422,11 @@ int tileSouth(int tileIndex){
 }
 
 void finish() {
-  if ( score > highScore ) {
-    fprintf(f, "%i", score);
-  } else {
-    fprintf(f, "%i", highScore);
-  }
+  highScore = score > highScore ? score : highScore;
 
+  f = fopen(".scores", "w");
+  fprintf(f, "%i", highScore);
   fclose(f);
+
   endwin(); // End ncurses mode
 }
