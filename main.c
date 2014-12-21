@@ -17,7 +17,6 @@
 // TODO: See if terminal can handle CHANGING colors.
 // TODO: Change colors to match web version.
 // TODO: Center game in terminal.
-// TODO: Remove ncurses dependency.
 
 const int START_LINE = 3;
 int grid[16];
@@ -173,14 +172,12 @@ void printBoard() {
 
   mvprintw( 1, 1, "2048");
 
-  // TODO: Make scores align right.
   mvprintw( 0, 10, "Score: %i", score);
   mvprintw( 1, 11, "Best: %i", highScore);
 
   int row = 0;
   int col = 0;
   for (i=0; i < 16; i++) {
-
     int squareValue = grid[i];
 
     row = i/4;
@@ -257,6 +254,7 @@ void shift( int direction ) {
   for (i = 0; i < numberOfRotationsAfter; i++) {
     rotateccw();
   }
+
   if (changeHappened) {
     // Set a random free square on the board to a 2 or 4.
     int newSquareValue = 2 * ((rand() % 2 ) + 1);
@@ -390,20 +388,13 @@ int checkNeighborsForMatch(int tileIndex) {
 int tileEast(int tileIndex){
   int canCheckE = tileIndex != 3 && tileIndex != 7 && tileIndex != 11 && tileIndex != 15;
 
-  if ( canCheckE ) {
-    return tileIndex + 1;
-  } else {
-    return -1;
-  }
+  return canCheckE ? tileIndex + 1 : -1;
 }
 
 int tileNorth(int tileIndex){
   int canCheckN = tileIndex > 3;
-  if ( canCheckN ) {
-    return tileIndex - 4;
-  } else {
-    return -1;
-  }
+
+  return canCheckN ? tileIndex - 4 : -1;
 }
 
 int tileWest(int tileIndex){
@@ -414,11 +405,8 @@ int tileWest(int tileIndex){
 
 int tileSouth(int tileIndex){
   int canCheckS = tileIndex < 12;
-  if ( canCheckS ) {
-    return tileIndex + 4;
-  } else {
-    return -1;
-  }
+
+  return canCheckS ? tileIndex + 4 : -1;
 }
 
 void finish() {
