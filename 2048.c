@@ -1,6 +1,5 @@
 /*
- *  main.c
- *  C-2048
+ *  2048.c
  *
  *  Created on: October 5, 2014
  *     Authors: shelbyspeegle & jesselink333
@@ -16,7 +15,6 @@
 // TODO: See if terminal can handle colors.
 // TODO: See if terminal can handle CHANGING colors.
 // TODO: Change colors to match web version.
-// TODO: Center game in terminal.
 
 const int START_LINE = 3;
 int grid[16];
