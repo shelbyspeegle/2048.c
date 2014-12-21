@@ -1,11 +1,11 @@
 CC=gcc
 CFLAGS=-Wall -g -O
 LFLAGS=-lncurses
-PROGS=main
+PROGS=2048
 
 all: $(PROGS)
 
-main: main.o
+2048: 2048.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LFLAGS)
 
 clean:
