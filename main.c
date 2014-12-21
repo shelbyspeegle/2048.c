@@ -20,7 +20,6 @@
 
 const int START_LINE = 3;
 int grid[16];
-int debug = false;
 int score;
 int highScore = 0;
 FILE *f;
@@ -33,7 +32,6 @@ int randomFreeSpace();
 void setup();
 void shift( int direction );
 int shiftRight();
-void showDebugInfo( int direction );
 void rotateccw();
 void finish();
 int tilePairsExist();
@@ -52,6 +50,7 @@ int main(int argc, const char * argv[]) {
   int playing = true;
 
   while( playing ) {
+    printBoard();
     int uInput = getch();
 
     switch (uInput) {
@@ -60,10 +59,6 @@ int main(int argc, const char * argv[]) {
         break;
       case 'r':
         newGame();
-        break;
-      case 'd':
-        debug = !debug;
-        showDebugInfo( 0 );
         break;
       case KEY_RIGHT:
         shift(0);
@@ -165,26 +160,23 @@ void newGame() {
 }
 
 void printBoard() {
-  int i;
-  for ( i = 0; i < START_LINE + 12; i++ ) {
-    mvprintw( i, 0, "                    ");
-  }
+  clear();
 
-  mvprintw( 1, 1, "2048");
+  int boardStartX = getmaxx(stdscr)/2 - 12;
 
-  mvprintw( 0, 10, "Score: %i", score);
-  mvprintw( 1, 11, "Best: %i", highScore);
+  mvprintw( 1, boardStartX + 1, "2048");
+  mvprintw( 0, boardStartX + 10, "Score: %i", score);
+  mvprintw( 1, boardStartX + 11, "Best: %i", highScore);
 
   int row = 0;
   int col = 0;
-  for (i=0; i < 16; i++) {
-    int squareValue = grid[i];
-
+  int i;
+  for (i = 0; i < 16; i++) {
     row = i/4;
     col = i%4;
 
     int squareStartY = START_LINE + row*3;
-    int squareStartX = col*6;
+    int squareStartX = boardStartX + col*6;
 
     move(squareStartY, squareStartX);
     addch(ACS_ULCORNER);
@@ -194,7 +186,7 @@ void printBoard() {
     addch(ACS_HLINE);
     addch(ACS_URCORNER);
     mvaddch(squareStartY +1, squareStartX, ACS_VLINE);
-    char * gridLabel = intToDisplay(squareValue);
+    char * gridLabel = intToDisplay( grid[i] );
     mvprintw(squareStartY +1, squareStartX +1, "%s", gridLabel);
     free(gridLabel);
     mvaddch(squareStartY +1, squareStartX +5, ACS_VLINE);
@@ -260,9 +252,6 @@ void shift( int direction ) {
     int newSquareValue = 2 * ((rand() % 2 ) + 1);
     grid[randomFreeSpace()] = newSquareValue;
   }
-
-  showDebugInfo( direction );
-  printBoard();
 }
 
 void rotateccw() {
@@ -336,14 +325,6 @@ int shiftRight() {
   }
 
   return changeHappened;
-}
-
-void showDebugInfo( int direction ) {
-  if ( debug ) {
-      mvprintw(0,25, "Direction = %i", direction);
-  } else {
-    mvprintw(0,25, "             ");
-  }
 }
 
 int tilePairsExist() {
