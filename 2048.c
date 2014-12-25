@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-// TODO: Handle "end game" cases.
+// TODO: Handle win case.
 // TODO: See if terminal can handle colors.
 // TODO: See if terminal can handle CHANGING colors.
 // TODO: Change colors to match web version.
@@ -26,8 +26,10 @@ void loadScoreData();
 char * intToDisplay( int input );
 void newGame();
 void printBoard();
+void printGameOverMessage();
 int randomFreeSpace();
 void setup();
+int gameOver();
 void shift( int direction );
 int shiftRight();
 void rotateccw();
@@ -48,7 +50,6 @@ int main(int argc, const char * argv[]) {
   int playing = true;
 
   while( playing ) {
-    printBoard();
     int uInput = getch();
 
     switch (uInput) {
@@ -74,8 +75,24 @@ int main(int argc, const char * argv[]) {
         break;
     }
 
-    if (!tilePairsExist()) {
-      playing = false;
+    printBoard();
+
+    if ( gameOver() ) {
+      printGameOverMessage();
+
+      while (true) {
+        uInput = getch();
+
+        if (uInput == 'r') {
+          newGame();
+          break;
+        } else if (uInput == 'q') {
+          playing = false;
+          break;
+        } else {
+          ; // Invalid user input. Ignore.
+        }
+      }
     }
   }
 
@@ -95,6 +112,47 @@ void loadScoreData() {
       f = NULL;
     }
   }
+}
+
+void printGameOverMessage() {
+  int boardStartX = getmaxx(stdscr)/2 - 12;
+
+  move( START_LINE + 3, boardStartX );
+  addch(ACS_ULCORNER);
+  int i;
+  for (i = 0; i < 22; i++) {
+    addch(ACS_HLINE);
+  }
+  addch(ACS_URCORNER);
+
+  move( START_LINE + 4, boardStartX );
+  addch(ACS_VLINE);
+  mvprintw(START_LINE + 4, boardStartX + 1, "      Game over!      ");
+  addch(ACS_VLINE);
+
+  move( START_LINE + 5, boardStartX );
+  addch(ACS_VLINE);
+  mvprintw(START_LINE + 5, boardStartX + 1, "                      ");
+  addch(ACS_VLINE);
+
+  move( START_LINE + 6, boardStartX );
+  addch(ACS_VLINE);
+  mvprintw(START_LINE + 6, boardStartX + 1, " Press r for new game ");
+  addch(ACS_VLINE);
+
+  move( START_LINE + 7, boardStartX );
+  addch(ACS_VLINE);
+  mvprintw(START_LINE + 7, boardStartX + 1, " or q to quit.        ");
+  addch(ACS_VLINE);
+
+  move( START_LINE + 8, boardStartX );
+  addch(ACS_LLCORNER);
+  for (i = 0; i < 22; i++) {
+    addch(ACS_HLINE);
+  }
+  addch(ACS_LRCORNER);
+
+  refresh();
 }
 
 char * intToDisplay(int inputNumber) {
@@ -163,8 +221,8 @@ void printBoard() {
   int boardStartX = getmaxx(stdscr)/2 - 12;
 
   mvprintw( 1, boardStartX + 1, "2048");
-  mvprintw( 0, boardStartX + 10, "Score: %i", score);
-  mvprintw( 1, boardStartX + 11, "Best: %i", highScore);
+  mvprintw( 0, boardStartX + 10, "Score: %6i", score);
+  mvprintw( 1, boardStartX + 11, "Best: %6i", highScore);
 
   int row = 0;
   int col = 0;
@@ -222,6 +280,15 @@ void setup() {
   noecho(); // Silence user input
   curs_set(0); // Hide the cursor
   keypad( stdscr, TRUE ); // Converts arrow key input to usable chars
+}
+
+int gameOver() {
+  if ( randomFreeSpace() == -1 ) {
+    if ( !tilePairsExist() ) {
+      return TRUE;
+    }
+  }
+  return FALSE;
 }
 
 void shift( int direction ) {
