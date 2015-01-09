@@ -11,13 +11,15 @@
 #include <stdlib.h>
 #include <time.h>
 
+#define NUM_TILES 16
+
 // TODO: Handle win case.
 // TODO: See if terminal can handle colors.
 // TODO: See if terminal can handle CHANGING colors.
 // TODO: Change colors to match web version.
 
 const int START_LINE = 3;
-int grid[16];
+int grid[NUM_TILES];
 int score;
 int highScore = 0;
 FILE *f;
@@ -46,7 +48,7 @@ int main(int argc, const char * argv[]) {
 
   setup();
   newGame();
-  
+
   int playing = true;
 
   while( playing ) {
@@ -205,7 +207,7 @@ void newGame() {
   score = 0;
 
   int i;
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < NUM_TILES; i++) {
     grid[i] = 0;
   }
 
@@ -220,14 +222,13 @@ void printBoard() {
 
   int boardStartX = getmaxx(stdscr)/2 - 12;
 
-  mvprintw( 1, boardStartX + 1, "2048");
   mvprintw( 0, boardStartX + 10, "Score: %6i", score);
-  mvprintw( 1, boardStartX + 11, "Best: %6i", highScore);
+  mvprintw( 1, boardStartX + 1, "2048      Best: %6i", highScore);
 
   int row = 0;
   int col = 0;
   int i;
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < NUM_TILES; i++) {
     row = i/4;
     col = i%4;
 
@@ -263,12 +264,12 @@ int randomFreeSpace() {
   int searchCount = 0;
 
   while ( 1 ) {
-    emptySquare = rand() % 16;
+    emptySquare = rand() % NUM_TILES;
 
     if (grid[emptySquare] == 0) {
       return emptySquare;
     }
-    if (searchCount++ == 16) {
+    if (searchCount++ == NUM_TILES) {
       return -1;
     }
   }
@@ -320,10 +321,10 @@ void shift( int direction ) {
 }
 
 void rotateccw() {
-  int tempGrid[16];
+  int tempGrid[NUM_TILES];
 
   int i;
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < NUM_TILES; i++) {
     tempGrid[i] = grid[i];
   }
 
@@ -341,10 +342,10 @@ int shiftRight() {
   int row;
   int changeHappened = false;
 
-  int tempGrid[16];
+  int tempGrid[NUM_TILES];
 
   int i;
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < NUM_TILES; i++) {
     tempGrid[i] = grid[i];
   }
 
@@ -383,7 +384,7 @@ int shiftRight() {
     }
   }
 
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < NUM_TILES; i++) {
     if (tempGrid[i] != grid[i]) {
       changeHappened = true;
     }
@@ -394,7 +395,7 @@ int shiftRight() {
 
 int tilePairsExist() {
   int i;
-  for ( i = 0; i < 16; i++ ) {
+  for ( i = 0; i < NUM_TILES; i++ ) {
     if (checkNeighborsForMatch(i)) {
       return true;
     }
