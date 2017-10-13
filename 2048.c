@@ -24,7 +24,6 @@ int score;
 int highScore = 0;
 FILE *f;
 
-void loadScoreData();
 char * intToDisplay( int input );
 void newGame();
 void printBoard();
@@ -35,7 +34,6 @@ int gameOver();
 void shift( int direction );
 int shiftRight();
 void rotateccw();
-void finish();
 int tilePairsExist();
 int checkNeighborsForMatch( int tileIndex );
 int tileEast( int tileIndex );
@@ -98,22 +96,16 @@ int main(int argc, const char * argv[]) {
     }
   }
 
-  finish();
+  // finish.
+  highScore = score > highScore ? score : highScore;
+  
+  f = fopen(".scores", "w");
+  fprintf(f, "%i", highScore);
+  fclose(f);
+
+  endwin(); // End ncurses mode
 
   exit( EXIT_SUCCESS );
-}
-
-void loadScoreData() {
-  f = fopen(".scores", "r");
-
-  if (f) {
-    char line[256];
-    if ( fgets(line, sizeof(line), f) ) {
-      highScore = atoi(line);
-      fclose(f);
-      f = NULL;
-    }
-  }
 }
 
 void printGameOverMessage() {
@@ -276,7 +268,17 @@ int randomFreeSpace() {
 }
 
 void setup() {
-  loadScoreData();
+  // load score data
+  f = fopen(".scores", "r");
+  if (f) {
+    char line[256];
+    if ( fgets(line, sizeof(line), f) ) {
+      highScore = atoi(line);
+      fclose(f);
+      f = NULL;
+    }
+  }
+
   initscr(); // Start ncurses mode
   noecho(); // Silence user input
   curs_set(0); // Hide the cursor
@@ -454,14 +456,4 @@ int tileSouth(int tileIndex){
   int canCheckS = tileIndex < 12;
 
   return canCheckS ? tileIndex + 4 : -1;
-}
-
-void finish() {
-  highScore = score > highScore ? score : highScore;
-
-  f = fopen(".scores", "w");
-  fprintf(f, "%i", highScore);
-  fclose(f);
-
-  endwin(); // End ncurses mode
 }
